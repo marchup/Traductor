@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { saveLexiconEntry } from '../lib/supabase'
+import { useState, useEffect } from 'react'
+import { saveLexiconEntry, getAllLexicon } from '../lib/supabase'
 import { INITIAL_DICTIONARY } from '../lib/sanjotanes'
 
 export default function AddWord() {
@@ -7,6 +7,16 @@ export default function AddWord() {
   const [sanjotanes, setSanjotanes] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
+  const [existingWords, setExistingWords] = useState([])
+
+  // Cargar todas las palabras existentes al montar
+  useEffect(() => {
+    const loadExisting = async () => {
+      const data = await getAllLexicon()
+      setExistingWords(data)
+    }
+    loadExisting()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -20,10 +30,31 @@ export default function AddWord() {
     const cleanSpanish = spanish.toLowerCase().trim()
     const cleanSanjotanes = sanjotanes.toLowerCase().trim()
 
-    // Verificar si ya existe en diccionario fijo
+    // 1. Verificar si ya existe en diccionario fijo
     const existsInFixed = INITIAL_DICTIONARY.find(e => e.spanish === cleanSpanish)
     if (existsInFixed) {
       setMessage({ type: 'error', text: `"${cleanSpanish}" ya existe en el diccionario fijo como "${existsInFixed.sanjotanes}"` })
+      return
+    }
+
+    // 2. Verificar si la palabra español YA EXISTE en BD
+    const spanishExists = existingWords.find(e => e.spanish_text === cleanSpanish)
+    if (spanishExists) {
+      setMessage({ type: 'error', text: `"${cleanSpanish}" ya existe en la base de datos como "${spanishExists.sanjotanes_text}"` })
+      return
+    }
+
+    // 3. Verificar si la palabra SANJOTANES YA ESTÁ USADA por otra español
+    const sanjotanesExists = existingWords.find(e => e.sanjotanes_text === cleanSanjotanes)
+    if (sanjotanesExists) {
+      setMessage({ type: 'error', text: `"${cleanSanjotanes}" ya está siendo usado por "${sanjotanesExists.spanish_text}". Cada palabra Sanjotanes debe ser única.` })
+      return
+    }
+
+    // 4. Verificar en diccionario fijo (sanjo -> español)
+    const sanjotanesInFixed = INITIAL_DICTIONARY.find(e => e.sanjotanes === cleanSanjotanes)
+    if (sanjotanesInFixed) {
+      setMessage({ type: 'error', text: `"${cleanSanjotanes}" ya está siendo usado por "${sanjotanesInFixed.spanish}" en el diccionario fijo.` })
       return
     }
 
@@ -41,10 +72,11 @@ export default function AddWord() {
       
       if (result) {
         setMessage({ type: 'success', text: `✓ "${cleanSpanish}" → "${cleanSanjotanes}" guardado correctamente` })
+        setExistingWords([...existingWords, result])
         setSpanish('')
         setSanjotanes('')
       } else {
-        setMessage({ type: 'error', text: 'Error al guardar. ¿Ya existe en la base de datos?' })
+        setMessage({ type: 'error', text: 'Error al guardar en la base de datos' })
       }
     } catch (err) {
       setMessage({ type: 'error', text: 'Error: ' + err.message })
@@ -125,12 +157,12 @@ export default function AddWord() {
       </div>
 
       <div className="panel bg-ocean-800/50">
-        <h4 className="text-gold-500 font-semibold mb-2">ℹ️ Notas</h4>
+        <h4 className="text-gold-500 font-semibold mb-2">ℹ️ Reglas de validación</h4>
         <ul className="text-sm text-gray-400 space-y-1 list-disc list-inside">
-          <li>Las palabras agregadas aquí tenden prioridad sobre el generador automático</li>
-          <li>No puedes modificar palabras del diccionario fijo (gabriel, tormenta, etc.)</li>
-          <li>Si una palabra ya existe en la base de datos, mostrará error</li>
-          <li>Usa el botón 🎲 para generar una palabra aleatoria de referencia</li>
+          <li>No se pueden repetir palabras en español</li>
+          <li>No se pueden repetir palabras en Sanjotanes (1:1 obligatorio)</li>
+          <li>No se pueden modificar palabras del diccionario fijo</li>
+          <li>Todo se guarda como LOCKED permanentemente</li>
         </ul>
       </div>
     </div>
