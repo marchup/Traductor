@@ -47,6 +47,7 @@ export const INITIAL_DICTIONARY = [
   { spanish: "mapa", sanjotanes: "selnak" },
   { spanish: "brujula", sanjotanes: "thalvek" },
   { spanish: "padre", sanjotanes: "drahven" },
+  { spanish: "madre", sanjotanes: "venra" }, 
   { spanish: "hijo", sanjotanes: "venrak" },
   { spanish: "recuerdo", sanjotanes: "shorvak" },
   { spanish: "tiempo", sanjotanes: "kelnor" },
