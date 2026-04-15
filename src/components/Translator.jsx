@@ -7,12 +7,22 @@ export default function Translator() {
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [initialized, setInitialized] = useState(false)
+  const [initError, setInitError] = useState(null)
 
   // Inicializar diccionario al cargar
   useEffect(() => {
     const init = async () => {
-      await initializeDictionary(saveLexiconEntry, getLexiconEntry)
-      setInitialized(true)
+      try {
+        console.log('Iniciando carga de diccionario...')
+        await initializeDictionary(saveLexiconEntry, getLexiconEntry)
+        console.log('Diccionario cargado correctamente')
+        setInitialized(true)
+      } catch (err) {
+        console.error('Error inicializando diccionario:', err)
+        setInitError(err.message)
+        // Permitir usar la app igual, con el diccionario en memoria
+        setInitialized(true)
+      }
     }
     init()
   }, [])
@@ -21,9 +31,14 @@ export default function Translator() {
     if (!input.trim() || !initialized) return
     
     setLoading(true)
-    const translation = await translateToSanjotanes(input, getLexiconEntry, saveLexiconEntry)
-    setResult(translation)
-    setLoading(false)
+    try {
+      const translation = await translateToSanjotanes(input, getLexiconEntry, saveLexiconEntry)
+      setResult(translation)
+    } catch (err) {
+      console.error('Error en traducción:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -32,6 +47,13 @@ export default function Translator() {
         <label className="block text-gold-500 font-semibold mb-2">
           Texto en Español
         </label>
+        
+        {initError && (
+          <div className="mb-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded text-yellow-200 text-sm">
+            ⚠️ Error de conexión con base de datos. Las palabras nuevas no se guardarán entre sesiones.
+          </div>
+        )}
+        
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -43,7 +65,7 @@ export default function Translator() {
           disabled={loading || !initialized}
           className="btn-primary mt-4 w-full disabled:opacity-50"
         >
-          {loading ? 'Traduciendo...' : 'Convertir a Sanjotanes'}
+          {!initialized ? 'Cargando diccionario...' : loading ? 'Traduciendo...' : 'Convertir a Sanjotanes'}
         </button>
       </div>
 
