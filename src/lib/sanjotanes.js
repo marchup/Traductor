@@ -1,13 +1,25 @@
 // ============================================
-// SANJOTANES GENERATOR v2.0 - DETERMINISTA PURO
+// SANJOTANES GENERATOR v3.0 - DETERMINISTA CON DICCIONARIO
 // ============================================
 
-// Pool fijo de sílabas - sonido marino/misterioso
+// Pool fijo de sílabas
 const SYLLABLES = [
   "sha", "vek", "tor", "nal", "kel", "var", "zen", "ruk", "thal", "mor",
-  "shel", "dren", "vak", "nor", "esh", "lir", "vos", "kan", "zel", "ruk",
-  "tar", "nes", "vol", "kar", "sho", "mer", "val", "rok", "sin", "dov",
-  "kesh", "lan", "vor", "tash", "ren", "mok", "sal", "kir", "ven", "tol"
+  "shel", "dren", "vak", "nor", "esh", "lir", "vos", "kan", "zel"
+];
+
+// Diccionario inicial fijo (NO MODIFICABLE)
+export const INITIAL_DICTIONARY = [
+  { spanish: "gabriel", sanjotanes: "ghavren" },
+  { spanish: "julian", sanjotanes: "julnash" },
+  { spanish: "radio", sanjotanes: "kelvar" },
+  { spanish: "tormenta", sanjotanes: "tromnash" },
+  { spanish: "mar", sanjotanes: "vash" },
+  { spanish: "isla", sanjotanes: "narek" },
+  { spanish: "barco", sanjotanes: "drelvak" },
+  { spanish: "señal", sanjotanes: "shanor" },
+  { spanish: "voz", sanjotanes: "vek" },
+  { spanish: "padre", sanjotanes: "drahven" }
 ];
 
 // ============================================
@@ -17,8 +29,8 @@ export function normalizeText(text) {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zñ\s!?]/g, '')
+    .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+    .replace(/[^a-zñ\s!?.,;:-]/g, '') // Mantener letras, espacios y puntuación básica
     .trim();
 }
 
@@ -31,7 +43,7 @@ function fnv1aHash(str) {
     hash ^= str.charCodeAt(i);
     hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
   }
-  return Math.abs(hash >>> 0); // Unsigned 32-bit
+  return Math.abs(hash >>> 0);
 }
 
 // ============================================
@@ -40,55 +52,40 @@ function fnv1aHash(str) {
 function createPRNG(seed) {
   let localSeed = seed;
   return function() {
-    // LCG (Linear Congruential Generator) - determinista
     localSeed = (localSeed * 9301 + 49297) % 233280;
     return localSeed / 233280;
   };
 }
 
 // ============================================
-// PASO 4: GENERACIÓN DE PALABRA DESDE CERO
+// PASO 4: GENERACIÓN DE PALABRA NUEVA
 // ============================================
-export function generateSanjotanes(spanishWord) {
-  // 1. Normalizar input
-  const normalized = normalizeText(spanishWord);
+export function generateSanjotanesWord(spanishWord) {
+  const normalized = spanishWord.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   
   if (!normalized) return '';
   
-  // 2. Generar hash determinista
   const hash = fnv1aHash(normalized);
-  
-  // 3. Crear PRNG con el hash como seed
   const prng = createPRNG(hash);
   
-  // 4. Decidir cantidad de sílabas (2 o 3)
-  const syllableCount = Math.floor(prng() * 2) + 2; // 2 o 3
+  // 2 o 3 sílabas
+  const syllableCount = Math.floor(prng() * 2) + 2;
   
-  // 5. Generar palabra seleccionando sílabas del pool
   let result = '';
-  let usedIndices = new Set();
+  let lastIndex = -1;
   
   for (let i = 0; i < syllableCount; i++) {
     let index;
-    // Evitar repetir la misma sílaba inmediatamente
+    // Evitar repetir la misma sílaba consecutiva
     do {
       index = Math.floor(prng() * SYLLABLES.length);
-    } while (usedIndices.has(index) && usedIndices.size < SYLLABLES.length);
+    } while (index === lastIndex && SYLLABLES.length > 1);
     
-    usedIndices.add(index);
+    lastIndex = index;
     result += SYLLABLES[index];
   }
   
   return result;
-}
-
-// ============================================
-// PASO 5: HASH PARA BASE DE DATOS (SHA1 truncado)
-// ============================================
-export function generateHash(text) {
-  // Usar FNV-1a como hash principal para consistencia
-  const hash = fnv1aHash(normalizeText(text));
-  return hash.toString(16).padStart(8, '0');
 }
 
 // ============================================
@@ -98,21 +95,23 @@ export async function translateToSanjotanes(text, getEntry, saveEntry) {
   const normalized = normalizeText(text);
   if (!normalized) return { original: text, translated: '', words: [] };
   
-  // Dividir en palabras (manteniendo ! y ? adjuntos)
-  const tokens = normalized.match(/[a-zñ]+|[!?]/g) || [];
+  // Separar palabras pero mantener espacios y puntuación
+  // Regex: palabras (letras) o (espacios/puntuación individuales)
+  const tokens = normalized.match(/[a-zñ]+|[^a-zñ]+/g) || [];
+  
   const results = [];
-  let translatedTokens = [];
+  const outputTokens = [];
   
   for (const token of tokens) {
-    // Si es puntuación, pasar directo
-    if (/^[!?]$/.test(token)) {
-      translatedTokens.push(token);
+    // Si es espacio o puntuación, pasar directo
+    if (!/[a-zñ]/.test(token)) {
+      outputTokens.push(token);
       continue;
     }
     
     const cleanWord = token;
     
-    // Verificar si existe en lexicón
+    // 1. BUSCAR EN BASE DE DATOS PRIMERO
     const existing = await getEntry(cleanWord);
     
     if (existing) {
@@ -120,48 +119,70 @@ export async function translateToSanjotanes(text, getEntry, saveEntry) {
         spanish: cleanWord,
         sanjotanes: existing.sanjotanes_text,
         hash: existing.hash,
-        isNew: false
+        isNew: false,
+        isFixed: false
       });
-      translatedTokens.push(existing.sanjotanes_text);
+      outputTokens.push(existing.sanjotanes_text);
     } else {
-      // Generar nueva palabra desde CERO
-      const sanjotanes = generateSanjotanes(cleanWord);
-      const hash = generateHash(cleanWord);
+      // 2. VERIFICAR SI ESTÁ EN DICCIONARIO INICIAL
+      const fixedEntry = INITIAL_DICTIONARY.find(
+        entry => entry.spanish === cleanWord
+      );
       
-      // Guardar en base de datos
-      await saveEntry(cleanWord, sanjotanes, hash);
-      
-      results.push({
-        spanish: cleanWord,
-        sanjotanes: sanjotanes,
-        hash: hash,
-        isNew: true
-      });
-      translatedTokens.push(sanjotanes);
+      if (fixedEntry) {
+        // Guardar en BD para futuras consultas
+        const hash = fnv1aHash(cleanWord).toString(16);
+        await saveEntry(cleanWord, fixedEntry.sanjotanes, hash);
+        
+        results.push({
+          spanish: cleanWord,
+          sanjotanes: fixedEntry.sanjotanes,
+          hash: hash,
+          isNew: true,
+          isFixed: true
+        });
+        outputTokens.push(fixedEntry.sanjotanes);
+      } else {
+        // 3. GENERAR NUEVA PALABRA
+        const sanjotanes = generateSanjotanesWord(cleanWord);
+        const hash = fnv1aHash(cleanWord).toString(16);
+        
+        // Guardar en BD
+        await saveEntry(cleanWord, sanjotanes, hash);
+        
+        results.push({
+          spanish: cleanWord,
+          sanjotanes: sanjotanes,
+          hash: hash,
+          isNew: true,
+          isFixed: false
+        });
+        outputTokens.push(sanjotanes);
+      }
     }
   }
   
   return {
     original: text,
-    translated: translatedTokens.join(''),
+    translated: outputTokens.join(''),
     words: results
   };
 }
 
 // ============================================
-// TEST CASES (para verificación)
+// INICIALIZAR DICCIONARIO (llamar al inicio)
 // ============================================
-export function runTests() {
-  const tests = ["hola", "gabriel", "tormenta", "radio", "isla"];
-  console.log("=== TEST CASES SANJOTANES v2.0 ===");
+export async function initializeDictionary(saveEntry) {
+  console.log('Inicializando diccionario Sanjotanes...');
   
-  tests.forEach(word => {
-    const result1 = generateSanjotanes(word);
-    const result2 = generateSanjotanes(word);
-    const hash = generateHash(word);
-    
-    console.log(`"${word}" → "${result1}" (hash: ${hash})`);
-    console.log(`  Determinista: ${result1 === result2 ? '✅' : '❌'}`);
-    console.log(`  Diferente input: ${result1 !== word ? '✅' : '❌'}`);
-  });
+  for (const entry of INITIAL_DICTIONARY) {
+    const existing = await getEntry(entry.spanish);
+    if (!existing) {
+      const hash = fnv1aHash(entry.spanish).toString(16);
+      await saveEntry(entry.spanish, entry.sanjotanes, hash);
+      console.log(`  ✓ ${entry.spanish} → ${entry.sanjotanes}`);
+    }
+  }
+  
+  console.log('Diccionario inicializado.');
 }
