@@ -16,10 +16,21 @@ function App() {
 
   return (
     <div className="min-h-screen bg-ocean-900">
+      {/* Header con Logo */}
       <header className="bg-ocean-800 border-b border-ocean-700">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gold-500">Sanjotanes Lexicon Tool</h1>
-          <p className="text-gray-400 mt-1">Sistema determinista de idioma para San José</p>
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-4">
+            {/* Logo del juego */}
+            <img 
+              src="/logo-san-jose.png" 
+              alt="San José - Echoes from the Abyss" 
+              className="h-16 w-auto rounded-full border-2 border-gold-500/50 shadow-lg shadow-gold-500/20"
+            />
+            <div>
+              <h1 className="text-2xl font-bold text-gold-500">Sanjotanes Lexicon Tool</h1>
+              <p className="text-gray-400 text-sm">Sistema determinista de idioma para San José</p>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -47,6 +58,20 @@ function App() {
         {activeTab === 'addword' && <AddWord />}
         {activeTab === 'export' && <ExportTool />}
       </main>
+
+      {/* Footer con branding */}
+      <footer className="border-t border-ocean-700 mt-12 py-6">
+        <div className="max-w-6xl mx-auto px-4 flex items-center justify-center gap-3">
+          <img 
+            src="/logo-san-jose.png" 
+            alt="" 
+            className="h-8 w-auto opacity-50"
+          />
+          <span className="text-gray-500 text-sm">
+            Sanjotanes Lexicon Tool • San José: Echoes from the Abyss • 2024
+          </span>
+        </div>
+      </footer>
     </div>
   )
 }
