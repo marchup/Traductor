@@ -2,24 +2,81 @@
 // SANJOTANES GENERATOR v3.0 - DETERMINISTA CON DICCIONARIO
 // ============================================
 
-// Pool fijo de sílabas
+// Pool fijo de sílabas para generación automática
 const SYLLABLES = [
   "sha", "vek", "tor", "nal", "kel", "var", "zen", "ruk", "thal", "mor",
   "shel", "dren", "vak", "nor", "esh", "lir", "vos", "kan", "zel"
 ];
 
-// Diccionario inicial fijo (NO MODIFICABLE)
+// ============================================
+// DICCIONARIO INICIAL FIJO (NO MODIFICABLE)
+// ============================================
 export const INITIAL_DICTIONARY = [
+  // Personas
   { spanish: "gabriel", sanjotanes: "ghavren" },
   { spanish: "julian", sanjotanes: "julnash" },
+  { spanish: "ana", sanjotanes: "anvek" },
+  
+  // Comunicación
   { spanish: "radio", sanjotanes: "kelvar" },
-  { spanish: "tormenta", sanjotanes: "tromnash" },
-  { spanish: "mar", sanjotanes: "vash" },
-  { spanish: "isla", sanjotanes: "narek" },
-  { spanish: "barco", sanjotanes: "drelvak" },
-  { spanish: "señal", sanjotanes: "shanor" },
   { spanish: "voz", sanjotanes: "vek" },
-  { spanish: "padre", sanjotanes: "drahven" }
+  { spanish: "señal", sanjotanes: "shanor" },
+  { spanish: "mensaje", sanjotanes: "velkar" },
+  { spanish: "escuchar", sanjotanes: "shavel" },
+  { spanish: "hablar", sanjotanes: "dravel" },
+  
+  // Mar y clima
+  { spanish: "mar", sanjotanes: "vash" },
+  { spanish: "agua", sanjotanes: "nalvek" },
+  { spanish: "tormenta", sanjotanes: "tromnash" },
+  { spanish: "viento", sanjotanes: "shelvar" },
+  { spanish: "nube", sanjotanes: "morvek" },
+  { spanish: "lluvia", sanjotanes: "velnash" },
+  { spanish: "niebla", sanjotanes: "norash" },
+  
+  // Lugares y fenómenos
+  { spanish: "isla", sanjotanes: "narek" },
+  { spanish: "fosa", sanjotanes: "drahkel" },
+  { spanish: "profundidad", sanjotanes: "thalnorek" },
+  { spanish: "luz", sanjotanes: "vekra" },
+  { spanish: "oscuridad", sanjotanes: "norsh" },
+  
+  // Barco y equipamiento
+  { spanish: "barco", sanjotanes: "drelvak" },
+  { spanish: "motor", sanjotanes: "karnel" },
+  { spanish: "combustible", sanjotanes: "velkor" },
+  { spanish: "casco", sanjotanes: "dranvek" },
+  { spanish: "mapa", sanjotanes: "selnak" },
+  { spanish: "brujula", sanjotanes: "thalvek" },
+  
+  // Familia y tiempo
+  { spanish: "padre", sanjotanes: "drahven" },
+  { spanish: "hijo", sanjotanes: "venrak" },
+  { spanish: "recuerdo", sanjotanes: "shorvak" },
+  { spanish: "tiempo", sanjotanes: "kelnor" },
+  { spanish: "pasado", sanjotanes: "norvak" },
+  { spanish: "presente", sanjotanes: "velnor" },
+  
+  // Estados y acciones
+  { spanish: "ayuda", sanjotanes: "sharnel" },
+  { spanish: "peligro", sanjotanes: "drashor" },
+  { spanish: "perdido", sanjotanes: "norlash" },
+  { spanish: "buscar", sanjotanes: "velshen" },
+  { spanish: "encontrar", sanjotanes: "sharnok" },
+  
+  // Saludos y preguntas
+  { spanish: "hola", sanjotanes: "kelshen" },
+  { spanish: "quien", sanjotanes: "norvek" },
+  { spanish: "donde", sanjotanes: "velrak" },
+  { spanish: "estas", sanjotanes: "shavrek" },
+  { spanish: "escuchas", sanjotanes: "shavelnor" },
+  
+  // Respuestas cortas
+  { spanish: "si", sanjotanes: "vek" },
+  { spanish: "no", sanjotanes: "nash" },
+  { spanish: "ven", sanjotanes: "vel" },
+  { spanish: "espera", sanjotanes: "sharen" },
+  { spanish: "rapido", sanjotanes: "karnash" }
 ];
 
 // ============================================
@@ -29,8 +86,8 @@ export function normalizeText(text) {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remover acentos
-    .replace(/[^a-zñ\s!?.,;:-]/g, '') // Mantener letras, espacios y puntuación básica
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zñ\s!?.,;:-]/g, '')
     .trim();
 }
 
@@ -76,7 +133,6 @@ export function generateSanjotanesWord(spanishWord) {
   
   for (let i = 0; i < syllableCount; i++) {
     let index;
-    // Evitar repetir la misma sílaba consecutiva
     do {
       index = Math.floor(prng() * SYLLABLES.length);
     } while (index === lastIndex && SYLLABLES.length > 1);
@@ -96,7 +152,6 @@ export async function translateToSanjotanes(text, getEntry, saveEntry) {
   if (!normalized) return { original: text, translated: '', words: [] };
   
   // Separar palabras pero mantener espacios y puntuación
-  // Regex: palabras (letras) o (espacios/puntuación individuales)
   const tokens = normalized.match(/[a-zñ]+|[^a-zñ]+/g) || [];
   
   const results = [];
@@ -130,7 +185,6 @@ export async function translateToSanjotanes(text, getEntry, saveEntry) {
       );
       
       if (fixedEntry) {
-        // Guardar en BD para futuras consultas
         const hash = fnv1aHash(cleanWord).toString(16);
         await saveEntry(cleanWord, fixedEntry.sanjotanes, hash);
         
@@ -147,7 +201,6 @@ export async function translateToSanjotanes(text, getEntry, saveEntry) {
         const sanjotanes = generateSanjotanesWord(cleanWord);
         const hash = fnv1aHash(cleanWord).toString(16);
         
-        // Guardar en BD
         await saveEntry(cleanWord, sanjotanes, hash);
         
         results.push({
@@ -172,7 +225,7 @@ export async function translateToSanjotanes(text, getEntry, saveEntry) {
 // ============================================
 // INICIALIZAR DICCIONARIO (llamar al inicio)
 // ============================================
-export async function initializeDictionary(saveEntry) {
+export async function initializeDictionary(saveEntry, getEntry) {
   console.log('Inicializando diccionario Sanjotanes...');
   
   for (const entry of INITIAL_DICTIONARY) {
