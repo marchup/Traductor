@@ -10,10 +10,16 @@ export async function getLexiconEntry(spanishText) {
     .from('lexicon')
     .select('*')
     .eq('spanish_text', spanishText.toLowerCase())
-    .single()
+    .limit(1)  // ← Cambiar .single() por .limit(1)
   
-  if (error && error.code !== 'PGRST116') return null
-  return data
+  // Si hay error real (no "no encontrado"), loguearlo
+  if (error) {
+    console.error('Error fetching lexicon:', error)
+    return null
+  }
+  
+  // Devolver el primer elemento o null
+  return data && data.length > 0 ? data[0] : null
 }
 
 export async function saveLexiconEntry(spanishText, sanjotanesText, hash) {
@@ -27,7 +33,10 @@ export async function saveLexiconEntry(spanishText, sanjotanesText, hash) {
     }])
     .select()
   
-  if (error) return null
+  if (error) {
+    console.error('Error saving lexicon:', error)
+    return null
+  }
   return data[0]
 }
 
@@ -37,7 +46,10 @@ export async function getAllLexicon() {
     .select('*')
     .order('created_at', { ascending: false })
   
-  if (error) return []
+  if (error) {
+    console.error('Error fetching all lexicon:', error)
+    return []
+  }
   return data
 }
 
@@ -48,6 +60,9 @@ export async function searchLexicon(query) {
     .or(`spanish_text.ilike.%${query}%,sanjotanes_text.ilike.%${query}%`)
     .order('created_at', { ascending: false })
   
-  if (error) return []
+  if (error) {
+    console.error('Error searching lexicon:', error)
+    return []
+  }
   return data
 }
