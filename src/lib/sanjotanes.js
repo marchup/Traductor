@@ -215,3 +215,24 @@ export async function initializeDictionary(saveEntry, getEntry) {
   
   console.log('Diccionario inicializado.');
 }
+
+// Al final del archivo, agregar función para verificar unicidad:
+
+// Cache de palabras sanjotanes ya usadas (en memoria + fijas)
+export function getUsedSanjotanesWords() {
+  const fixed = INITIAL_DICTIONARY.map(e => e.sanjotanes);
+  return new Set(fixed);
+}
+
+// Generar palabra única (reintentar si colisiona)
+export function generateUniqueSanjotanesWord(spanishWord, existingWordsSet) {
+  let attempts = 0;
+  let result;
+  
+  do {
+    result = generateSanjotanesWord(spanishWord + (attempts > 0 ? attempts : ''));
+    attempts++;
+  } while (existingWordsSet.has(result) && attempts < 10);
+  
+  return result;
+}
