@@ -6,6 +6,9 @@ import AddWord from './components/AddWord'
 
 function App() {
   const [activeTab, setActiveTab] = useState('translator')
+  
+  // URL directa al logo en GitHub
+  const logoUrl = "https://raw.githubusercontent.com/marchup/Traductor/main/logo-san-jose.png"
 
   const tabs = [
     { id: 'translator', label: 'Traductor' },
@@ -16,13 +19,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-ocean-900">
-      {/* Header con Logo */}
       <header className="bg-ocean-800 border-b border-ocean-700">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            {/* Logo del juego */}
             <img 
-              src="/logo-san-jose.png" 
+              src={logoUrl}
               alt="San José - Echoes from the Abyss" 
               className="h-16 w-auto rounded-full border-2 border-gold-500/50 shadow-lg shadow-gold-500/20"
             />
@@ -59,17 +60,9 @@ function App() {
         {activeTab === 'export' && <ExportTool />}
       </main>
 
-      {/* Footer con branding */}
       <footer className="border-t border-ocean-700 mt-12 py-6">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-center gap-3">
-          <img 
-            src="/logo-san-jose.png" 
-            alt="" 
-            className="h-8 w-auto opacity-50"
-          />
-          <span className="text-gray-500 text-sm">
-            Sanjotanes Lexicon Tool • San José: Echoes from the Abyss • 2024
-          </span>
+        <div className="max-w-6xl mx-auto px-4 text-center text-gray-500 text-sm">
+          Sanjotanes Lexicon Tool • San José: Echoes from the Abyss • 2024
         </div>
       </footer>
     </div>
