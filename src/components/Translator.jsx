@@ -11,7 +11,7 @@ export default function Translator() {
   // Inicializar diccionario al cargar
   useEffect(() => {
     const init = async () => {
-      await initializeDictionary(saveLexiconEntry)
+      await initializeDictionary(saveLexiconEntry, getLexiconEntry)
       setInitialized(true)
     }
     init()
