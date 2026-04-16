@@ -663,3 +663,27 @@ export async function translateToVashen(text, getEntry, saveEntry) {
   };
 }
 
+// ============================================
+// 17. INICIALIZAR DICCIONARIO
+// ============================================
+export async function initializeDictionary(saveEntry, getEntry) {
+  console.log('Inicializando diccionario Vashén v2.0...');
+  
+  for (const entry of FIXED_DICTIONARY) {
+    const existing = await getEntry(entry.spanish);
+    if (!existing) {
+      await saveEntry(
+        entry.spanish,
+        entry.vashen,
+        entry.root || 'canon',
+        entry.locked
+      );
+      console.log(`  ✓ ${entry.spanish} → ${entry.vashen}`);
+    }
+  }
+  
+  console.log('Diccionario Vashén inicializado.');
+}
+
+// Alias para compatibilidad con componentes antiguos
+export const INITIAL_DICTIONARY = FIXED_DICTIONARY;
