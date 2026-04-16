@@ -1,21 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  body {
-    @apply bg-ocean-900 text-gray-100 min-h-screen;
-  }
-}
-
-@layer components {
-  .btn-primary {
-    @apply bg-gold-500 hover:bg-gold-600 text-ocean-900 font-bold py-2 px-4 rounded transition-colors;
-  }
-  .input-field {
-    @apply w-full bg-ocean-800 border border-ocean-700 rounded px-4 py-2 text-gray-100 focus:outline-none focus:border-gold-500;
-  }
-  .panel {
-    @apply bg-ocean-800 rounded-lg p-6 border border-ocean-700;
-  }
-}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vashén Lexicon Tool</title>
+  </head>
+  <body class="bg-ocean-900 text-gray-100">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
