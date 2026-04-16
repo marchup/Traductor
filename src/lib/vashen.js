@@ -1,4 +1,4 @@
-'''// VASHÉN LANGUAGE SYSTEM v2.0 - COHERENTE
+
 // Especificación completa implementada
 // ============================================
 
