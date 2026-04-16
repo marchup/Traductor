@@ -1,7 +1,3 @@
-
-# Generar el archivo vashen.js completo y limpio
-
-vashen_js = '''// ============================================
 // VASHÉN LANGUAGE SYSTEM v2.0 - COHERENTE
 // Especificación completa implementada
 // ============================================
@@ -665,17 +661,4 @@ export async function initializeDictionary(saveEntry, getEntry) {
   
   console.log('Diccionario Vashén inicializado.');
 }
-'''
 
-# Guardar en archivo
-with open('/mnt/kimi/output/vashen.js', 'w', encoding='utf-8') as f:
-    f.write(vashen_js)
-
-print("✅ Archivo vashen.js generado correctamente")
-print(f"📄 Ubicación: /mnt/kimi/output/vashen.js")
-print(f"📊 Tamaño: {len(vashen_js)} caracteres")
-print("\n📋 Instrucciones:")
-print("1. Copiá el contenido de arriba (o descargá el archivo)")
-print("2. Pegalo en src/lib/vashen.js en tu repo")
-print("3. Hacé commit y push")
-print("4. Redeploy en Vercel")
