@@ -508,8 +508,8 @@ export function normalizeText(text) {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\\u0300-\\u036f]/g, '')
-    .replace(/[^a-zñ\\s!?.,;:-]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')     // Sin doble escape
+    .replace(/[^a-zñ\s!?.,;:-]/g, '')    // Sin doble escape, \s simple
     .trim();
 }
 
@@ -519,10 +519,11 @@ export function normalizeText(text) {
 export function tokenize(text) {
   const normalized = normalizeText(text);
   if (!normalized) return [];
-
+  
   // Separar por espacios manteniendo la estructura
   return normalized.split(/(\s+)/).filter(token => token.length > 0);
 }
+
 
 // ============================================
 // 16. TRADUCCIÓN PRINCIPAL (CANON) - CORREGIDO
