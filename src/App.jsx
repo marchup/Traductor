@@ -6,8 +6,7 @@ import AddWord from './components/AddWord'
 
 function App() {
   const [activeTab, setActiveTab] = useState('translator')
-  
-  // URL directa al logo en GitHub
+
   const logoUrl = "https://raw.githubusercontent.com/marchup/Traductor/main/logo-san-jose.png"
 
   const tabs = [
@@ -28,8 +27,8 @@ function App() {
               className="h-16 w-auto rounded-full border-2 border-gold-500/50 shadow-lg shadow-gold-500/20"
             />
             <div>
-              <h1 className="text-2xl font-bold text-gold-500">Sanjotanes Lexicon Tool</h1>
-              <p className="text-gray-400 text-sm">Sistema determinista de idioma para San José</p>
+              <h1 className="text-2xl font-bold text-gold-500">Vashén Lexicon Tool</h1>
+              <p className="text-gray-400 text-sm">Lengua del Mar para San José</p>
             </div>
           </div>
         </div>
@@ -62,7 +61,7 @@ function App() {
 
       <footer className="border-t border-ocean-700 mt-12 py-6">
         <div className="max-w-6xl mx-auto px-4 text-center text-gray-500 text-sm">
-          Sanjotanes Lexicon Tool • San José: Echoes from the Abyss • 2024
+          Vashén Lexicon Tool • San José: Echoes from the Abyss • 2024
         </div>
       </footer>
     </div>
