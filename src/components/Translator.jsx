@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { translateToSanjotanes, initializeDictionary } from '../lib/sanjotanes'
+import { translateToVashen, initializeDictionary } from '../lib/vashen'
 import { getLexiconEntry, saveLexiconEntry } from '../lib/supabase'
 
 export default function Translator() {
@@ -9,7 +9,6 @@ export default function Translator() {
   const [initialized, setInitialized] = useState(false)
   const [initError, setInitError] = useState(null)
 
-  // Inicializar diccionario al cargar
   useEffect(() => {
     const init = async () => {
       try {
@@ -20,7 +19,6 @@ export default function Translator() {
       } catch (err) {
         console.error('Error inicializando diccionario:', err)
         setInitError(err.message)
-        // Permitir usar la app igual, con el diccionario en memoria
         setInitialized(true)
       }
     }
@@ -32,7 +30,7 @@ export default function Translator() {
     
     setLoading(true)
     try {
-      const translation = await translateToSanjotanes(input, getLexiconEntry, saveLexiconEntry)
+      const translation = await translateToVashen(input, getLexiconEntry, saveLexiconEntry)
       setResult(translation)
     } catch (err) {
       console.error('Error en traducción:', err)
@@ -50,14 +48,14 @@ export default function Translator() {
         
         {initError && (
           <div className="mb-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded text-yellow-200 text-sm">
-            ⚠️ Error de conexión con base de datos. Las palabras nuevas no se guardarán entre sesiones.
+            ⚠️ Error de conexión con base de datos.
           </div>
         )}
         
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Escribe aquí para traducir a Sanjotanes..."
+          placeholder="Escribe aquí para traducir a Vashén..."
           className="input-field h-32 resize-none"
         />
         <button
@@ -65,7 +63,7 @@ export default function Translator() {
           disabled={loading || !initialized}
           className="btn-primary mt-4 w-full disabled:opacity-50"
         >
-          {!initialized ? 'Cargando diccionario...' : loading ? 'Traduciendo...' : 'Convertir a Sanjotanes'}
+          {!initialized ? 'Cargando...' : loading ? 'Traduciendo...' : 'Convertir a Vashén'}
         </button>
       </div>
 
@@ -79,7 +77,7 @@ export default function Translator() {
           </div>
           
           <div className="border-t border-ocean-700 pt-4">
-            <label className="text-sm text-gold-600">Sanjotanes:</label>
+            <label className="text-sm text-gold-600">Vashén:</label>
             <p className="text-2xl font-mono text-gold-500 whitespace-pre-wrap">
               {result.translated}
             </p>
@@ -94,7 +92,7 @@ export default function Translator() {
                 <thead className="text-gray-500 border-b border-ocean-700">
                   <tr>
                     <th className="text-left py-2">Español</th>
-                    <th className="text-left py-2">Sanjotanes</th>
+                    <th className="text-left py-2">Vashén</th>
                     <th className="text-left py-2">Tipo</th>
                   </tr>
                 </thead>
@@ -103,12 +101,20 @@ export default function Translator() {
                     <tr key={idx} className="border-b border-ocean-700/50">
                       <td className="py-2 text-gray-300">{word.spanish}</td>
                       <td className="py-2 font-mono text-gold-400">
-                        {word.sanjotanes}
+                        {word.vashen}
                       </td>
                       <td className="py-2">
                         {word.isFixed ? (
                           <span className="text-purple-400 text-xs bg-purple-900/30 px-2 py-1 rounded">
                             FIJO
+                          </span>
+                        ) : word.isConnector ? (
+                          <span className="text-yellow-400 text-xs bg-yellow-900/30 px-2 py-1 rounded">
+                            CONECTOR
+                          </span>
+                        ) : word.isNumber ? (
+                          <span className="text-cyan-400 text-xs bg-cyan-900/30 px-2 py-1 rounded">
+                            NÚMERO
                           </span>
                         ) : word.isNew ? (
                           <span className="text-green-400 text-xs bg-green-900/30 px-2 py-1 rounded">
