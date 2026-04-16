@@ -8,17 +8,16 @@ export default function ExportTool() {
     const data = await getAllLexicon()
     const exportData = data.map(e => ({
       spanish: e.spanish_text,
-      sanjotanes: e.sanjotanes_text,
+      vashen: e.vashen_text,
       hash: e.hash,
-      locked: e.locked,
-      created_at: e.created_at
+      locked: e.locked
     }))
     
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `sanjotanes_lexicon_${new Date().toISOString().split('T')[0]}.json`
+    a.download = `vashen_lexicon_${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
     setMessage({ type: 'success', text: `Exportados ${data.length} registros` })
@@ -26,11 +25,11 @@ export default function ExportTool() {
 
   const exportToCSV = async () => {
     const data = await getAllLexicon()
-    const headers = ['spanish', 'sanjotanes', 'hash', 'locked', 'created_at']
+    const headers = ['spanish', 'vashen', 'hash', 'locked']
     const csv = [
       headers.join(','),
       ...data.map(e => [
-        `"${e.spanish_text}"`, `"${e.sanjotanes_text}"`, `"${e.hash}"`, e.locked, `"${e.created_at}"`
+        `"${e.spanish_text}"`, `"${e.vashen_text}"`, `"${e.hash}"`, e.locked
       ].join(','))
     ].join('\n')
     
@@ -38,7 +37,7 @@ export default function ExportTool() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `sanjotanes_lexicon_${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `vashen_lexicon_${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
     setMessage({ type: 'success', text: `Exportados ${data.length} registros` })
@@ -47,7 +46,7 @@ export default function ExportTool() {
   return (
     <div className="space-y-6">
       <div className="panel">
-        <h3 className="text-gold-500 font-semibold mb-4">Exportar Lexicón</h3>
+        <h3 className="text-gold-500 font-semibold mb-4">Exportar Lexicón Vashén</h3>
         <div className="flex gap-4">
           <button onClick={exportToJSON} className="btn-primary">Exportar JSON</button>
           <button onClick={exportToCSV} className="btn-primary bg-ocean-700 hover:bg-ocean-600">Exportar CSV</button>
