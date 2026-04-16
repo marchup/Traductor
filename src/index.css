@@ -3,10 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --vashen-primary: #1e3a5f;
-  --vashen-secondary: #c9a227;
-  --vashen-dark: #0f172a;
-  --vashen-light: #f8fafc;
+  --ocean-900: #0a1628;
+  --ocean-800: #1a2b4a;
+  --ocean-700: #2a4068;
+  --gold-500: #d4af37;
+  --gold-600: #b8941f;
 }
 
 * {
@@ -17,13 +18,32 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--vashen-dark);
-  color: var(--vashen-light);
+  background-color: var(--ocean-900);
+  color: #f8fafc;
   min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* ===== CLASES PERSONALIZADAS ===== */
+
+.panel {
+  @apply bg-ocean-800 rounded-lg p-6 border border-ocean-700;
+}
+
+.input-field {
+  @apply w-full bg-ocean-900 border border-ocean-700 rounded-lg px-4 py-3 
+         text-gray-100 placeholder-gray-500 
+         focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500
+         transition-colors;
+}
+
+.btn-primary {
+  @apply bg-gold-600 hover:bg-gold-500 text-ocean-900 font-semibold 
+         px-6 py-3 rounded-lg transition-colors
+         disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 /* Scrollbar personalizada */
@@ -32,15 +52,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--vashen-dark);
+  background: var(--ocean-900);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--vashen-primary);
+  background: var(--ocean-800);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--vashen-secondary);
+  background: var(--gold-600);
 }
-
