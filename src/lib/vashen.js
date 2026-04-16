@@ -1,4 +1,4 @@
-
+// VASHÉN LANGUAGE SYSTEM v2.0 - COHERENTE
 // Especificación completa implementada
 // ============================================
 
@@ -49,6 +49,7 @@ export const ROOTS = {
 // ============================================
 // 2. SUFIJOS DE SUSTANTIVOS (5 - CANON)
 // ============================================
+// Regla: SOLO aplican a sustantivos
 export const NOUN_SUFFIXES = {
   OS: { type: 'entidad', desc: 'ser/entidad viviente', weight: 1.0 },
   AN: { type: 'objeto', desc: 'objeto o lugar físico', weight: 1.2 },
@@ -60,6 +61,7 @@ export const NOUN_SUFFIXES = {
 // ============================================
 // 3. EXTENSIONES VERBALES (3 - CANON)
 // ============================================
+// Regla: SOLO aplican a verbos
 export const VERB_EXTENSIONS = {
   EN: { type: 'continuidad', desc: 'acción continua/progresiva' },
   OR: { type: 'intencion', desc: 'acción dirigida/intencional' },
@@ -67,7 +69,7 @@ export const VERB_EXTENSIONS = {
 };
 
 // ============================================
-// 4. CONECTORES (15 fijos - CANON)
+// 4. CONECTORES (12 fijos - CANON)
 // ============================================
 export const CONNECTORS = {
   // Artículos
@@ -78,7 +80,7 @@ export const CONNECTORS = {
   'un': 'UN',
   'una': 'UN',
   
-  // Preposiciones principales
+  // Preposiciones
   'de': 'DEL',
   'del': 'DEL',
   'a': 'A',
@@ -88,11 +90,6 @@ export const CONNECTORS = {
   'sin': 'SIN',
   'por': 'PRA',
   'para': 'PRA',
-  
-  // Preposiciones adicionales (especificación)
-  'desde': 'DES',
-  'hasta': 'HAS',
-  'sobre': 'SOB',
   
   // Conjunciones
   'y': 'E',
@@ -119,6 +116,7 @@ export const NUMBERS = {
   '10': 'DEKA'
 };
 
+// Composición para 11+: DEKA + UNI, etc.
 export function composeNumber(n) {
   if (n <= 10) return NUMBERS[String(n)] || 'NUL';
   if (n < 20) return 'DEKA' + NUMBERS[String(n - 10)];
@@ -127,94 +125,213 @@ export function composeNumber(n) {
     const units = n % 10;
     return NUMBERS[String(tens)] + 'DEKA' + (units > 0 ? NUMBERS[String(units)] : '');
   }
-  return 'NUL';
+  return 'NUL'; // Por ahora solo 0-99
 }
 
 // ============================================
 // 6. REGLAS FONÉTICAS (CANON)
 // ============================================
+// Evitar: AA, AE, EA, duplicación conflictiva
 export function applyPhoneticRules(base, suffix) {
   let result = base + suffix;
+  
+  // Regla 1: AA → A
   result = result.replace(/AA/g, 'A');
+  
+  // Regla 2: AE → E
   result = result.replace(/AE/g, 'E');
+  
+  // Regla 3: EA → A (fusionar, priorizar vocal posterior)
   result = result.replace(/EA/g, 'A');
+  
+  // Regla 4: AO → O
   result = result.replace(/AO/g, 'O');
+  
+  // Regla 5: OA → A
   result = result.replace(/OA/g, 'A');
+  
+  // Regla 6: EE → E
   result = result.replace(/EE/g, 'E');
+  
+  // Regla 7: OO → O
   result = result.replace(/OO/g, 'O');
+  
   return result;
 }
 
 // ============================================
 // 7. MAPEO SEMÁNTICO ESTRICTO (CANON)
 // ============================================
+// Jerarquía: palabra exacta → campo semántico → raíz relacionada
 const SEMANTIC_MAP = {
   // MAR / AGUA (VAS, LUM)
-  'mar': 'VAS', 'oceano': 'VAS', 'agua': 'VAS', 'ola': 'LUM',
-  'rio': 'LUM', 'lago': 'VAS', 'charco': 'LUM', 'lluvia': 'THA',
-  'rocio': 'THA', 'nieve': 'THA', 'hielo': 'THA', 'vapor': 'VEN',
+  'mar': 'VAS',
+  'oceano': 'VAS',
+  'agua': 'VAS',
+  'ola': 'LUM',
+  'rio': 'LUM',
+  'lago': 'VAS',
+  'charco': 'LUM',
+  'lluvia': 'THA',
+  'rocio': 'THA',
+  'nieve': 'THA',
+  'hielo': 'THA',
+  'vapor': 'VEN',
   'niebla': 'VEN',
   
   // VIENTO / CLIMA (VEN, THA)
-  'viento': 'VEN', 'aire': 'VEN', 'brisa': 'VEN', 'tormenta': 'THA',
-  'huracan': 'THA', 'tempestad': 'THA', 'trueno': 'THA', 'relampago': 'THA',
+  'viento': 'VEN',
+  'aire': 'VEN',
+  'brisa': 'VEN',
+  'tormenta': 'THA',
+  'huracan': 'THA',
+  'tempestad': 'THA',
+  'trueno': 'THA',
+  'relampago': 'THA',
   
   // FUEGO / CALOR (VOR)
-  'fuego': 'VOR', 'calor': 'VOR', 'llama': 'VOR', 'brasas': 'VOR',
-  'quemar': 'VOR', 'arder': 'VOR', 'ceniza': 'VOR',
+  'fuego': 'VOR',
+  'calor': 'VOR',
+  'llama': 'VOR',
+  'brasas': 'VOR',
+  'quemar': 'VOR',
+  'arder': 'VOR',
+  'ceniza': 'VOR',
   
   // TIERRA / GEOGRAFÍA (SHE, KAL, SIL)
-  'tierra': 'SHE', 'suelo': 'SHE', 'arena': 'SHE', 'barro': 'SHE',
-  'piedra': 'KAL', 'roca': 'KAL', 'montana': 'KAL', 'cerro': 'KAL',
-  'isla': 'SHE', 'peninsula': 'SHE', 'costa': 'SHE', 'playa': 'SHE',
-  'arbol': 'SIL', 'bosque': 'SIL', 'madera': 'SIL', 'hoja': 'SIL',
-  'raiz': 'SIL', 'flor': 'SIL',
+  'tierra': 'SHE',
+  'suelo': 'SHE',
+  'arena': 'SHE',
+  'barro': 'SHE',
+  'piedra': 'KAL',
+  'roca': 'KAL',
+  'montana': 'KAL',
+  'cerro': 'KAL',
+  'isla': 'SHE',
+  'peninsula': 'SHE',
+  'costa': 'SHE',
+  'playa': 'SHE',
+  'arbol': 'SIL',
+  'bosque': 'SIL',
+  'madera': 'SIL',
+  'hoja': 'SIL',
+  'raiz': 'SIL',
+  'flor': 'SIL',
   
   // HUMANOS / VIDA (NAL, BES, SOM)
-  'hombre': 'NAL', 'mujer': 'NAL', 'persona': 'NAL', 'gente': 'NAL',
-  'hijo': 'NAL', 'padre': 'NAL', 'madre': 'NAL', 'familia': 'NAL',
-  'capitan': 'NAL', 'lider': 'NAL', 'jefe': 'NAL', 'comandante': 'NAL',
-  'animal': 'BES', 'pez': 'BES', 'pajaro': 'BES', 'bestia': 'BES',
-  'muerte': 'SOM', 'morir': 'SOM', 'muerto': 'SOM', 'sueno': 'SOM',
-  'pesadilla': 'SOM', 'fantasma': 'SOM',
+  'hombre': 'NAL',
+  'mujer': 'NAL',
+  'persona': 'NAL',
+  'gente': 'NAL',
+  'hijo': 'NAL',
+  'padre': 'NAL',
+  'madre': 'NAL',
+  'familia': 'NAL',
+  'animal': 'BES',
+  'pez': 'BES',
+  'pajaro': 'BES',
+  'bestia': 'BES',
+  'muerte': 'SOM',
+  'morir': 'SOM',
+  'muerto': 'SOM',
+  'sueno': 'SOM',
+  'pesadilla': 'SOM',
+  'fantasma': 'SOM',
   
   // PELIGRO / FUERZA (MOR, KOR)
-  'peligro': 'MOR', 'miedo': 'MOR', 'terror': 'MOR', 'dano': 'MOR',
-  'dolor': 'MOR', 'herida': 'MOR', 'enfermedad': 'MOR', 'plaga': 'MOR',
-  'fuerza': 'KOR', 'poder': 'KOR', 'fuerte': 'KOR', 'bravo': 'KOR',
-  'guerrero': 'KOR', 'arma': 'KOR', 'escudo': 'KOR',
+  'peligro': 'MOR',
+  'miedo': 'MOR',
+  'terror': 'MOR',
+  'dano': 'MOR',
+  'dolor': 'MOR',
+  'herida': 'MOR',
+  'enfermedad': 'MOR',
+  'plaga': 'MOR',
+  'fuerza': 'KOR',
+  'poder': 'KOR',
+  'fuerte': 'KOR',
+  'bravo': 'KOR',
+  'guerrero': 'KOR',
+  'arma': 'KOR',
+  'escudo': 'KOR',
   
   // LUZ / OSCURIDAD (ZEL, NOK, DIA)
-  'luz': 'ZEL', 'claridad': 'ZEL', 'esperanza': 'ZEL', 'estrella': 'AST',
-  'sol': 'DIA', 'dia': 'DIA', 'amanecer': 'DIA', 'atardecer': 'DIA',
-  'noche': 'NOK', 'oscuridad': 'NOK', 'negro': 'NOK', 'sombra': 'NOK',
+  'luz': 'ZEL',
+  'claridad': 'ZEL',
+  'esperanza': 'ZEL',
+  'estrella': 'AST',
+  'sol': 'DIA',
+  'dia': 'DIA',
+  'amanecer': 'DIA',
+  'atardecer': 'DIA',
+  'noche': 'NOK',
+  'oscuridad': 'NOK',
+  'negro': 'NOK',
+  'sombra': 'NOK',
   'luna': 'AST',
   
-  // CONOCIMIENTO / PERCEPCIÓN (SAB, DRA, CRE)
-  'saber': 'SAB', 'conocer': 'SAB', 'sabio': 'SAB', 'pensar': 'SAB',
-  'idea': 'SAB', 'mente': 'SAB',
-  'observar': 'SAB', 'ver': 'SAB', 'mirar': 'ZEL', 'percibir': 'SAB',
-  'recuerdo': 'EKO', 'memoria': 'EKO',
-  'hablar': 'DRA', 'decir': 'DRA', 'voz': 'DRA', 'palabra': 'DRA',
-  'idioma': 'DRA', 'nombre': 'DRA', 'llamar': 'DRA',
-  'creer': 'CRE', 'fe': 'CRE', 'dios': 'CRE', 'santo': 'CRE',
-  'oracion': 'CRE', 'altar': 'CRE',
+  // CONOCIMIENTO / HABLA (SAB, DRA, CRE)
+  'saber': 'SAB',
+  'conocer': 'SAB',
+  'sabio': 'SAB',
+  'pensar': 'SAB',
+  'idea': 'SAB',
+  'mente': 'SAB',
+  'recuerdo': 'EKO',
+  'memoria': 'EKO',
+  'hablar': 'DRA',
+  'decir': 'DRA',
+  'voz': 'DRA',
+  'palabra': 'DRA',
+  'idioma': 'DRA',
+  'nombre': 'DRA',
+  'llamar': 'DRA',
+  'creer': 'CRE',
+  'fe': 'CRE',
+  'dios': 'CRE',
+  'santo': 'CRE',
+  'oracion': 'CRE',
+  'altar': 'CRE',
   
   // ACCIÓN / CONSTRUCCIÓN (CON, RAK)
-  'hacer': 'CON', 'construir': 'CON', 'crear': 'CON', 'fabricar': 'CON',
-  'casa': 'CON', 'edificio': 'CON', 'puente': 'CON', 'muelle': 'CON',
-  'barco': 'VAS', 'nave': 'VAS', 'vela': 'VEN',
-  'ir': 'RAK', 'venir': 'RAK', 'mover': 'RAK', 'viajar': 'RAK',
-  'caminar': 'RAK', 'navegar': 'VAS', 'zarpar': 'RAK', 'llegar': 'RAK',
+  'hacer': 'CON',
+  'construir': 'CON',
+  'crear': 'CON',
+  'fabricar': 'CON',
+  'casa': 'CON',
+  'barco': 'VAS',
+  'nave': 'VAS',
+  'vela': 'VEN',
+  'ir': 'RAK',
+  'venir': 'RAK',
+  'mover': 'RAK',
+  'viajar': 'RAK',
+  'caminar': 'RAK',
+  'navegar': 'VAS',
+  'zarpar': 'RAK',
+  'llegar': 'RAK',
   
   // SILENCIO / PAZ (SEL)
-  'silencio': 'SEL', 'paz': 'SEL', 'calma': 'SEL', 'quieto': 'SEL',
-  'tranquilo': 'SEL', 'descanso': 'SEL',
+  'silencio': 'SEL',
+  'paz': 'SEL',
+  'calma': 'SEL',
+  'quieto': 'SEL',
+  'tranquilo': 'SEL',
+  'descanso': 'SEL',
   
   // TIEMPO (TEM)
-  'tiempo': 'TEM', 'ahora': 'TEM', 'antes': 'TEM', 'despues': 'TEM',
-  'ayer': 'TEM', 'manana': 'TEM', 'siempre': 'TEM', 'nunca': 'TEM',
-  'ano': 'TEM', 'edad': 'TEM', 'epoca': 'TEM', 'siglo': 'TEM'
+  'tiempo': 'TEM',
+  'ahora': 'TEM',
+  'antes': 'TEM',
+  'despues': 'TEM',
+  'ayer': 'TEM',
+  'manana': 'TEM',
+  'siempre': 'TEM',
+  'nunca': 'TEM',
+  'ano': 'TEM',
+  'edad': 'TEM',
+  'epoca': 'TEM',
+  'siglo': 'TEM'
 };
 
 // ============================================
@@ -225,34 +342,50 @@ const ADJECTIVE_INDICATORS = ['oso', 'osa', 'able', 'ible', 'ente', 'ante'];
 
 export function detectWordType(word) {
   const w = word.toLowerCase();
+  
+  // Verbos (terminaciones comunes)
   if (VERB_INDICATORS.some(end => w.endsWith(end))) return 'verb';
+  
+  // Adjetivos
   if (ADJECTIVE_INDICATORS.some(end => w.endsWith(end))) return 'adjective';
+  
+  // Números
   if (/^\\d+$/.test(w)) return 'number';
+  
+  // Conectores
   if (CONNECTORS[w]) return 'connector';
+  
+  // Por defecto: sustantivo
   return 'noun';
 }
 
 // ============================================
 // 9. SELECCIONAR RAÍZ (JERARQUÍA CANON)
 // ============================================
+// Orden: 1. Palabra exacta → 2. Campo semántico → 3. Derivación coherente
 export function selectRoot(spanishWord, wordType) {
   const w = spanishWord.toLowerCase().trim();
   
+  // 1. Buscar mapeo exacto
   if (SEMANTIC_MAP[w]) {
     return { root: SEMANTIC_MAP[w], method: 'exact', field: ROOTS[SEMANTIC_MAP[w]].field };
   }
   
+  // 2. Buscar por inclusión (substring)
   for (const [key, root] of Object.entries(SEMANTIC_MAP)) {
     if (w.includes(key)) {
       return { root, method: 'partial', field: ROOTS[root].field };
     }
   }
   
-  let fallbackRoot = 'SHE';
-  if (wordType === 'verb') fallbackRoot = 'RAK';
-  else if (wordType === 'adjective') fallbackRoot = 'IS';
-  else if (w.length < 4) fallbackRoot = 'NAL';
+  // 3. Selección por tipo de palabra (fallback coherente)
+  let fallbackRoot = 'SHE'; // tierra como default
   
+  if (wordType === 'verb') fallbackRoot = 'RAK'; // movimiento
+  else if (wordType === 'adjective') fallbackRoot = 'IS'; // estado (usar sufijo IS)
+  else if (w.length < 4) fallbackRoot = 'NAL'; // cosas pequeñas → humano
+  
+  // Determinista: usar hash de la palabra para seleccionar variante
   const hash = w.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
   const rootKeys = Object.keys(ROOTS);
   const selectedRoot = rootKeys[hash % rootKeys.length];
@@ -261,41 +394,55 @@ export function selectRoot(spanishWord, wordType) {
 }
 
 // ============================================
-// 10. GENERAR PREFIJO
+// 10. GENERAR PREFIJO (2 primeras letras de raíz)
 // ============================================
 export function generatePrefix(rootKey) {
   return rootKey.substring(0, 2);
 }
 
 // ============================================
-// 11. SELECCIONAR SUFIJO
+// 11. SELECCIONAR SUFIJO (según tipo y contexto)
 // ============================================
 export function selectSuffix(wordType, context) {
   if (wordType === 'verb') {
+    // Verbos: usar extensiones verbales
+    // Por defecto: EN (continuidad)
     return { suffix: 'EN', type: 'verb', desc: VERB_EXTENSIONS['EN'].desc };
   }
+  
   if (wordType === 'adjective') {
+    // Adjetivos: usar IS (estado/cualidad)
     return { suffix: 'IS', type: 'noun', desc: NOUN_SUFFIXES['IS'].desc };
   }
+  
+  // Sustantivos: seleccionar según semántica
+  // Seres vivos → OS, Lugares/objetos → AN, Abstractos → EN
   if (context.isLiving) return { suffix: 'OS', type: 'noun', desc: NOUN_SUFFIXES['OS'].desc };
   if (context.isPlace) return { suffix: 'AN', type: 'noun', desc: NOUN_SUFFIXES['AN'].desc };
   if (context.isAbstract) return { suffix: 'EN', type: 'noun', desc: NOUN_SUFFIXES['EN'].desc };
   if (context.isEvent) return { suffix: 'AK', type: 'noun', desc: NOUN_SUFFIXES['AK'].desc };
+  
+  // Default: AN (objeto/lugar) - más común
   return { suffix: 'AN', type: 'noun', desc: NOUN_SUFFIXES['AN'].desc };
 }
 
 // ============================================
-// 12. GENERAR PALABRA VASHÉN
+// 12. GENERAR PALABRA VASHÉN (CANON)
 // ============================================
 export function generateVashenWord(spanishWord, wordType, context) {
+  // 1. Seleccionar raíz según jerarquía
   const { root: rootKey, method, field } = selectRoot(spanishWord, wordType);
   const root = ROOTS[rootKey];
   
+  // 2. Seleccionar variante de raíz (determinista)
   const hash = spanishWord.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
   const variantIndex = hash % root.variants.length;
   const variant = root.variants[variantIndex];
   
+  // 3. Seleccionar sufijo según tipo
   const { suffix, type: suffixType } = selectSuffix(wordType, context || {});
+  
+  // 4. Aplicar reglas fonéticas
   const result = applyPhoneticRules(variant, suffix);
   
   return {
@@ -310,10 +457,11 @@ export function generateVashenWord(spanishWord, wordType, context) {
 }
 
 // ============================================
-// 13. DICCIONARIO INICIAL (PALABRAS FIJAS - ACTUALIZADO)
+// 13. DICCIONARIO INICIAL (PALABRAS FIJAS)
 // ============================================
+// Estas palabras son CANON y nunca cambian
 export const FIXED_DICTIONARY = [
-  // Conectores (15 fijos)
+  // Conectores (obligatorios)
   { spanish: 'el', vashen: 'ELA', type: 'connector', locked: true },
   { spanish: 'la', vashen: 'ELA', type: 'connector', locked: true },
   { spanish: 'los', vashen: 'ELAS', type: 'connector', locked: true },
@@ -328,11 +476,8 @@ export const FIXED_DICTIONARY = [
   { spanish: 'para', vashen: 'PRA', type: 'connector', locked: true },
   { spanish: 'un', vashen: 'UN', type: 'connector', locked: true },
   { spanish: 'una', vashen: 'UN', type: 'connector', locked: true },
-  { spanish: 'desde', vashen: 'DES', type: 'connector', locked: true },
-  { spanish: 'hasta', vashen: 'HAS', type: 'connector', locked: true },
-  { spanish: 'sobre', vashen: 'SOB', type: 'connector', locked: true },
   
-  // Palabras del juego (canon) + nuevas
+  // Palabras del juego (canon)
   { spanish: 'mar', vashen: 'VASH', root: 'VAS', type: 'noun', locked: true },
   { spanish: 'oceano', vashen: 'VASN', root: 'VAS', type: 'noun', locked: true },
   { spanish: 'tormenta', vashen: 'THALOS', root: 'THA', type: 'noun', locked: true },
@@ -353,16 +498,8 @@ export const FIXED_DICTIONARY = [
   { spanish: 'nave', vashen: 'VASAN', root: 'VAS', type: 'noun', locked: true },
   { spanish: 'estrella', vashen: 'ASTOS', root: 'AST', type: 'noun', locked: true },
   { spanish: 'noche', vashen: 'NOKEN', root: 'NOK', type: 'noun', locked: true },
-  { spanish: 'dia', vashen: 'DIAR', root: 'DIA', type: 'noun', locked: true },
-  
-  // NUEVAS PALABRAS CLAVE
-  { spanish: 'capitan', vashen: 'NALOS', root: 'NAL', type: 'noun', locked: true },
-  { spanish: 'observa', vashen: 'SABEN', root: 'SAB', type: 'verb', locked: true },
-  { spanish: 'puente', vashen: 'CONAN', root: 'CON', type: 'noun', locked: true }
+  { spanish: 'dia', vashen: 'DIAR', root: 'DIA', type: 'noun', locked: true }
 ];
-
-// Alias para compatibilidad
-export const INITIAL_DICTIONARY = FIXED_DICTIONARY;
 
 // ============================================
 // 14. NORMALIZACIÓN DE TEXTO
@@ -371,22 +508,25 @@ export function normalizeText(text) {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\\u0300-\\u036f]/g, '')
-    .replace(/[^a-zñ\\s!?.,;:-]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')     // Sin doble escape
+    .replace(/[^a-zñ\s!?.,;:-]/g, '')    // Sin doble escape, \s simple
     .trim();
 }
 
 // ============================================
-// 15. TOKENIZAR TEXTO
+// 15. TOKENIZAR TEXTO (CORREGIDO)
 // ============================================
 export function tokenize(text) {
   const normalized = normalizeText(text);
   if (!normalized) return [];
-  return normalized.split(/(\\s+)/).filter(token => token.length > 0);
+  
+  // Separar por espacios manteniendo la estructura
+  return normalized.split(/(\s+)/).filter(token => token.length > 0);
 }
 
+
 // ============================================
-// 16. TRADUCCIÓN PRINCIPAL
+// 16. TRADUCCIÓN PRINCIPAL (CANON) - CORREGIDO
 // ============================================
 export async function translateToVashen(text, getEntry, saveEntry) {
   const tokens = tokenize(text);
@@ -396,22 +536,27 @@ export async function translateToVashen(text, getEntry, saveEntry) {
 
   const results = [];
   const outputTokens = [];
-  const processedWords = new Set();
+  const processedWords = new Set(); // Para evitar duplicados en la tabla
 
   for (const token of tokens) {
-    if (/^\\s+$/.test(token)) {
+    // Mantener espacios y puntuación tal cual
+    if (/^\s+$/.test(token)) {
       outputTokens.push(token);
       continue;
     }
+
+    // Puntuación (mantenerla)
     if (!/[a-zñ]/.test(token)) {
       outputTokens.push(token);
       continue;
     }
 
     const cleanWord = token.toLowerCase();
-    
+
+    // 1. Buscar en diccionario fijo (CANON)
     const fixed = FIXED_DICTIONARY.find(e => e.spanish === cleanWord);
     if (fixed) {
+      // Guardar en BD si no existe (para persistencia)
       const existing = await getEntry(cleanWord);
       if (!existing) {
         await saveEntry(cleanWord, fixed.vashen, fixed.root || 'canon', true);
@@ -431,6 +576,7 @@ export async function translateToVashen(text, getEntry, saveEntry) {
       continue;
     }
 
+    // 2. Buscar en BD (palabras ya generadas)
     const existing = await getEntry(cleanWord);
     if (existing) {
       if (!processedWords.has(cleanWord)) {
@@ -447,8 +593,10 @@ export async function translateToVashen(text, getEntry, saveEntry) {
       continue;
     }
 
+    // 3. Detectar tipo y generar
     const wordType = detectWordType(cleanWord);
 
+    // Números
     if (wordType === 'number') {
       const num = parseInt(cleanWord, 10);
       const vashenNum = composeNumber(num);
@@ -467,6 +615,7 @@ export async function translateToVashen(text, getEntry, saveEntry) {
       continue;
     }
 
+    // Conectores (deberían estar en FIXED, pero por si acaso)
     if (CONNECTORS[cleanWord]) {
       const vashen = CONNECTORS[cleanWord];
       await saveEntry(cleanWord, vashen, 'connector', true);
@@ -484,8 +633,11 @@ export async function translateToVashen(text, getEntry, saveEntry) {
       continue;
     }
 
+    // 4. Generar nueva palabra según especificación
     const generated = generateVashenWord(cleanWord, wordType, {});
     const vashen = generated.vashen;
+
+    // Guardar en BD
     await saveEntry(cleanWord, vashen, generated.root, false);
 
     if (!processedWords.has(cleanWord)) {
@@ -504,6 +656,7 @@ export async function translateToVashen(text, getEntry, saveEntry) {
     outputTokens.push(vashen);
   }
 
+  // Unir preservando espacios originales
   return {
     original: text,
     translated: outputTokens.join(''),
@@ -532,3 +685,6 @@ export async function initializeDictionary(saveEntry, getEntry) {
   
   console.log('Diccionario Vashén inicializado.');
 }
+
+// Alias para compatibilidad con componentes antiguos
+export const INITIAL_DICTIONARY = FIXED_DICTIONARY;
