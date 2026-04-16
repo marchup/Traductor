@@ -663,6 +663,20 @@ export async function translateToVashen(text, getEntry, saveEntry) {
   };
 }
 
+
+======================================================================
+INSTRUCCIONES:
+1. Reemplazá las funciones tokenize() y translateToVashen() en vashen.js
+2. El cambio principal es:
+   - tokenize ahora usa split(/(\s+)/) para mantener espacios
+   - outputTokens.join('') sin espacio extra (ya están en los tokens)
+   - Agregué Set para evitar palabras duplicadas en la tabla de resultados
+3. Commit, push y redeploy
+<>:12: SyntaxWarning: invalid escape sequence '\s'
+<>:12: SyntaxWarning: invalid escape sequence '\s'
+/tmp/ipykernel_318/13358022.py:12: SyntaxWarning: invalid escape sequence '\s'
+  return normalized.split(/(\s+)/).filter(token => token.length > 0);
+
 // ============================================
 // 17. INICIALIZAR DICCIONARIO
 // ============================================
