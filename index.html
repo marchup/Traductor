@@ -1,13 +1,55 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sanjotanes Lexicon Tool</title>
-  </head>
-  <body class="bg-ocean-900 text-gray-100">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traductor Vashén - Lenguaje de San José</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌊 Traductor Vashén</h1>
+            <p>Lenguaje nativo de la isla de San José - Anterior a la colonización</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <h2>Entrada (Español)</h2>
+                <textarea id="inputText" placeholder='Ejemplo:
+capitán|sustantivo|hombre
+observa|verbo|luz|EN
+tormenta|sustantivo|clima
+el|conector
+barco|sustantivo|mar
+navega|verbo|movimiento|EN
+peligro|sustantivo|peligro'></textarea>
+                <div class="format-hint">
+                    <strong>Formato:</strong> palabra|tipo|campo|extensión<br>
+                    <strong>Tipos:</strong> sustantivo, verbo, conector, número<br>
+                    <strong>Campos:</strong> clima, mar, peligro, tierra, hombre, fuerza, luz, movimiento, habla, silencio<br>
+                    <strong>Extensiones verbales (opcional):</strong> EN, OR, AK
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="translateBtn">🔄 Traducir a Vashén</button>
+                <button id="clearBtn">🗑️ Limpiar</button>
+                <button id="exampleBtn">📝 Cargar Ejemplo</button>
+            </div>
+
+            <div class="output-section">
+                <h2>Resultado (Vashén)</h2>
+                <div id="outputText" class="output-box"></div>
+                <div id="translationDetails" class="details-box"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Vashén - Lenguaje construido para el juego "Echoes from the Abyss"</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>
