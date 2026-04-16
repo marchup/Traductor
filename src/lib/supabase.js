@@ -5,6 +5,7 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
+// Obtener entrada del léxico
 export async function getLexiconEntry(spanishText) {
   const { data, error } = await supabase
     .from('lexicon')
@@ -20,14 +21,16 @@ export async function getLexiconEntry(spanishText) {
   return data && data.length > 0 ? data[0] : null
 }
 
-export async function saveLexiconEntry(spanishText, vashenText, hash) {
+// Guardar entrada (nueva firma compatible con v2.0)
+export async function saveLexiconEntry(spanishText, vashenText, rootOrHash, locked = false) {
   const { data, error } = await supabase
     .from('lexicon')
     .insert([{
       spanish_text: spanishText.toLowerCase(),
       vashen_text: vashenText,
-      hash: hash,
-      locked: true
+      root: typeof rootOrHash === 'string' ? rootOrHash : null,
+      hash: typeof rootOrHash === 'string' ? null : rootOrHash,
+      locked: locked
     }])
     .select()
   
@@ -38,6 +41,7 @@ export async function saveLexiconEntry(spanishText, vashenText, hash) {
   return data[0]
 }
 
+// Obtener todo el léxico
 export async function getAllLexicon() {
   const { data, error } = await supabase
     .from('lexicon')
@@ -51,6 +55,7 @@ export async function getAllLexicon() {
   return data
 }
 
+// Buscar en léxico
 export async function searchLexicon(query) {
   const { data, error } = await supabase
     .from('lexicon')
