@@ -90,6 +90,9 @@ export const CONNECTORS = {
   'sin': 'SIN',
   'por': 'PRA',
   'para': 'PRA',
+  'desde': 'DES',
+  'hasta': 'HAS',
+  'sobre': 'SOB',
   
   // Conjunciones
   'y': 'E',
@@ -219,6 +222,9 @@ const SEMANTIC_MAP = {
   'flor': 'SIL',
   
   // HUMANOS / VIDA (NAL, BES, SOM)
+  'capitan': 'NAL',
+  'lider': 'NAL',
+  'comandante': 'NAL',
   'hombre': 'NAL',
   'mujer': 'NAL',
   'persona': 'NAL',
@@ -688,3 +694,4 @@ export async function initializeDictionary(saveEntry, getEntry) {
 
 // Alias para compatibilidad con componentes antiguos
 export const INITIAL_DICTIONARY = FIXED_DICTIONARY;
+
