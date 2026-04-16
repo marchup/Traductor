@@ -514,37 +514,44 @@ export function normalizeText(text) {
 }
 
 // ============================================
-// 15. TOKENIZAR TEXTO
+// 15. TOKENIZAR TEXTO (CORREGIDO)
 // ============================================
 export function tokenize(text) {
   const normalized = normalizeText(text);
   if (!normalized) return [];
-  
-  // Separar palabras y puntuación
-  return normalized.match(/[a-zñ]+|[^a-zñ\\s]+/g) || [];
+
+  // Separar por espacios manteniendo la estructura
+  return normalized.split(/(\s+)/).filter(token => token.length > 0);
 }
 
 // ============================================
-// 16. TRADUCCIÓN PRINCIPAL (CANON)
+// 16. TRADUCCIÓN PRINCIPAL (CANON) - CORREGIDO
 // ============================================
 export async function translateToVashen(text, getEntry, saveEntry) {
   const tokens = tokenize(text);
   if (tokens.length === 0) {
     return { original: text, translated: '', words: [] };
   }
-  
+
   const results = [];
   const outputTokens = [];
-  
+  const processedWords = new Set(); // Para evitar duplicados en la tabla
+
   for (const token of tokens) {
-    // Puntuación y espacios
+    // Mantener espacios y puntuación tal cual
+    if (/^\s+$/.test(token)) {
+      outputTokens.push(token);
+      continue;
+    }
+
+    // Puntuación (mantenerla)
     if (!/[a-zñ]/.test(token)) {
       outputTokens.push(token);
       continue;
     }
-    
+
     const cleanWord = token.toLowerCase();
-    
+
     // 1. Buscar en diccionario fijo (CANON)
     const fixed = FIXED_DICTIONARY.find(e => e.spanish === cleanWord);
     if (fixed) {
@@ -553,89 +560,105 @@ export async function translateToVashen(text, getEntry, saveEntry) {
       if (!existing) {
         await saveEntry(cleanWord, fixed.vashen, fixed.root || 'canon', true);
       }
-      results.push({
-        spanish: cleanWord,
-        vashen: fixed.vashen,
-        type: fixed.type,
-        root: fixed.root,
-        isCanon: true,
-        isNew: !existing
-      });
+      if (!processedWords.has(cleanWord)) {
+        results.push({
+          spanish: cleanWord,
+          vashen: fixed.vashen,
+          type: fixed.type,
+          root: fixed.root,
+          isCanon: true,
+          isNew: !existing
+        });
+        processedWords.add(cleanWord);
+      }
       outputTokens.push(fixed.vashen);
       continue;
     }
-    
+
     // 2. Buscar en BD (palabras ya generadas)
     const existing = await getEntry(cleanWord);
     if (existing) {
-      results.push({
-        spanish: cleanWord,
-        vashen: existing.vashen_text,
-        type: 'stored',
-        isCanon: false,
-        isNew: false
-      });
+      if (!processedWords.has(cleanWord)) {
+        results.push({
+          spanish: cleanWord,
+          vashen: existing.vashen_text,
+          type: 'stored',
+          isCanon: false,
+          isNew: false
+        });
+        processedWords.add(cleanWord);
+      }
       outputTokens.push(existing.vashen_text);
       continue;
     }
-    
+
     // 3. Detectar tipo y generar
     const wordType = detectWordType(cleanWord);
-    
+
     // Números
     if (wordType === 'number') {
       const num = parseInt(cleanWord, 10);
       const vashenNum = composeNumber(num);
       await saveEntry(cleanWord, vashenNum, 'number', true);
-      results.push({
-        spanish: cleanWord,
-        vashen: vashenNum,
-        type: 'number',
-        isNumber: true,
-        isNew: true
-      });
+      if (!processedWords.has(cleanWord)) {
+        results.push({
+          spanish: cleanWord,
+          vashen: vashenNum,
+          type: 'number',
+          isNumber: true,
+          isNew: true
+        });
+        processedWords.add(cleanWord);
+      }
       outputTokens.push(vashenNum);
       continue;
     }
-    
+
     // Conectores (deberían estar en FIXED, pero por si acaso)
     if (CONNECTORS[cleanWord]) {
       const vashen = CONNECTORS[cleanWord];
       await saveEntry(cleanWord, vashen, 'connector', true);
-      results.push({
-        spanish: cleanWord,
-        vashen: vashen,
-        type: 'connector',
-        isConnector: true,
-        isNew: true
-      });
+      if (!processedWords.has(cleanWord)) {
+        results.push({
+          spanish: cleanWord,
+          vashen: vashen,
+          type: 'connector',
+          isConnector: true,
+          isNew: true
+        });
+        processedWords.add(cleanWord);
+      }
       outputTokens.push(vashen);
       continue;
     }
-    
+
     // 4. Generar nueva palabra según especificación
     const generated = generateVashenWord(cleanWord, wordType, {});
     const vashen = generated.vashen;
-    
+
     // Guardar en BD
     await saveEntry(cleanWord, vashen, generated.root, false);
-    
-    results.push({
-      spanish: cleanWord,
-      vashen: vashen,
-      type: wordType,
-      root: generated.root,
-      suffix: generated.suffix,
-      method: generated.method,
-      field: generated.field,
-      isNew: true
-    });
+
+    if (!processedWords.has(cleanWord)) {
+      results.push({
+        spanish: cleanWord,
+        vashen: vashen,
+        type: wordType,
+        root: generated.root,
+        suffix: generated.suffix,
+        method: generated.method,
+        field: generated.field,
+        isNew: true
+      });
+      processedWords.add(cleanWord);
+    }
     outputTokens.push(vashen);
   }
-  
+
+  // Unir preservando espacios originales
   return {
     original: text,
-    translated: outputTokens.join(' '),
+    translated: outputTokens.join(''),
     words: results
   };
 }
