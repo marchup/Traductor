@@ -661,4 +661,5 @@ export async function initializeDictionary(saveEntry, getEntry) {
   
   console.log('Diccionario Vashén inicializado.');
 }
-
+// Alias para compatibilidad con componentes antiguos
+export const INITIAL_DICTIONARY = FIXED_DICTIONARY;
